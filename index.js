@@ -10,7 +10,9 @@ ngapp.run(function(exampleService, settingsService) {
         templateUrl: `${modulePath}/partials/exampleSettings.html`,
         controller: 'exampleSettingsController',
         defaultSettings: {
-            message: 'HI!'
+            exampleModule: {
+                message: 'HI!'
+            }
         }
     });
 });
