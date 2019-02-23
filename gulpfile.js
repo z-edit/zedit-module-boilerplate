@@ -10,21 +10,23 @@ gulp.task('clean', function() {
         .pipe(clean());
 });
 
-gulp.task('build', ['clean'], function() {
-    gulp.src('index.js')
-        .pipe(include())
-        .on('error', console.log)
-        .pipe(gulp.dest('dist'));
+gulp.task('build', gulp.series('clean', function() {
+    return Promise.all([
+        gulp.src('index.js')
+            .pipe(include())
+            .on('error', console.log)
+            .pipe(gulp.dest('dist')),
 
-    gulp.src('partials/*.html')
-        .pipe(gulp.dest('dist/partials'));
-
-    gulp.src('docs/*.html')
-        .pipe(gulp.dest('dist/docs'));
-
-    gulp.src('module.json')
-        .pipe(gulp.dest('dist'));
-});
+        gulp.src('partials/*.html')
+            .pipe(gulp.dest('dist/partials')),
+            
+        gulp.src('docs/*.html')
+            .pipe(gulp.dest('dist/docs')),
+            
+        gulp.src('module.json')
+            .pipe(gulp.dest('dist'))
+    ]);
+}));
 
 gulp.task('release', function() {
     let moduleInfo = JSON.parse(fs.readFileSync('module.json')),
@@ -34,10 +36,10 @@ gulp.task('release', function() {
 
     console.log(`Packaging ${zipFileName}`);
 
-    gulp.src('dist/**/*', { base: 'dist/'})
+    return gulp.src('dist/**/*', { base: 'dist/'})
         .pipe(rename((path) => path.dirname = `${moduleId}/${path.dirname}`))
         .pipe(zip(zipFileName))
         .pipe(gulp.dest('.'));
 });
 
-gulp.task('default', ['build']);
+gulp.task('default', gulp.series('build', 'release'));
